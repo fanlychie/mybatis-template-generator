@@ -1,0 +1,30 @@
+package ${basePackage}.mapper;
+
+import java.util.List;
+import ${basePackage}.entity.Entity;
+
+public interface BaseMapper<T extends Entity> {
+
+	int insert(T entity);
+	
+	int update(T entity);
+	
+	int delete(T entity);
+	
+	int deleteById(Object id);
+	
+	long selectCount(T entity);
+	
+	T selectOne(T entity);
+	
+	T selectById(Object id);
+	
+	List<T> selectList(T entity);
+	
+	int batchInsert(List<T> entities);
+	
+	int batchDelete(List<T> entities);
+	
+	int batchDeleteById(Object... ids);
+	
+}

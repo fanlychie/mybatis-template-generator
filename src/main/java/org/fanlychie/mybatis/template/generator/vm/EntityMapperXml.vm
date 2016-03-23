@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+#set($TABLE_NAME = ${table.origin.toUpperCase()})
+<mapper namespace="${basePackage}.mapper.${table.name}Mapper">
+
+	<resultMap id="${table.name}ResultMap" type="${basePackage}.entity.${table.name}">
+		<id property="${table.pk}" column="${table.opk.toUpperCase()}" />
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+		<result property="${column.name}" column="${column.getOrigin().toUpperCase()}" />
+#end
+#end
+	</resultMap>
+
+	<sql id="dynamicWhereSQL">
+		<where>
+			<if test="${table.pk} != null">
+				AND ${table.opk.toUpperCase()} = #{${table.pk}}
+			</if>
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+			<if test="${column.name} != null">
+				AND ${column.getOrigin().toUpperCase()} = #{${column.name}}
+			</if>
+#end
+#end
+		</where>
+	</sql>
+
+	<sql id="dynamicSetSQL">
+		<set>
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+			<if test="${column.name} != null">
+				${column.getOrigin().toUpperCase()} = #{${column.name}},
+			</if>
+#end
+#end
+		</set>
+	</sql>
+#set($insertValues = "")
+#set($insertColumns = "")
+#set($insertValuesItem = "")
+#foreach($column in $table.columns)
+	#set($insertValues =  "$insertValues#{${column.name}}, ")
+	#set($insertValuesItem =  "$insertValuesItem#{item.${column.name}}, ")
+	#set($insertColumns =  "$insertColumns${column.getOrigin().toUpperCase()}, ")
+#end
+#set($insertValuesActiveLength = $insertValues.length() - 2)
+#set($insertValues = $insertValues.substring(0, $insertValuesActiveLength))
+#set($insertValuesItemActiveLength = $insertValuesItem.length() - 2)
+#set($insertValuesItem = $insertValuesItem.substring(0, $insertValuesItemActiveLength))
+#set($insertColumnsActiveLength = $insertColumns.length() - 2)
+#set($insertColumns = $insertColumns.substring(0, $insertColumnsActiveLength))
+
+	<insert id="insert" parameterType="${basePackage}.entity.${table.name}">
+		INSERT INTO $TABLE_NAME (
+			$insertColumns
+		) VALUES (
+			$insertValues
+		)
+	</insert>
+
+	<update id="update" parameterType="${basePackage}.entity.${table.name}">
+		UPDATE $TABLE_NAME <include refid="dynamicSetSQL" /> WHERE ${table.opk.toUpperCase()} = #{${table.pk}}
+	</update>
+
+	<delete id="delete" parameterType="${basePackage}.entity.${table.name}">
+		DELETE FROM $TABLE_NAME WHERE ${table.opk.toUpperCase()} = #{${table.pk}}
+	</delete>
+
+	<delete id="deleteById">
+		DELETE FROM $TABLE_NAME WHERE ${table.opk.toUpperCase()} = #{ID}
+	</delete>
+  
+	<select id="selectCount" parameterType="${basePackage}.entity.${table.name}" resultType="_long">
+		SELECT COUNT(1) FROM $TABLE_NAME <include refid="dynamicWhereSQL" />
+	</select>
+
+	<select id="selectById" resultMap="${table.name}ResultMap">
+		SELECT * FROM $TABLE_NAME WHERE ${table.opk.toUpperCase()} = #{ID}
+	</select>
+
+	<select id="selectOne" parameterType="${basePackage}.entity.${table.name}" resultMap="${table.name}ResultMap">
+		SELECT * FROM $TABLE_NAME <include refid="dynamicWhereSQL" />
+	</select>
+
+	<select id="selectList" parameterType="${basePackage}.entity.${table.name}" resultMap="${table.name}ResultMap">
+		SELECT * FROM $TABLE_NAME <include refid="dynamicWhereSQL" /> ORDER BY ${table.opk.toUpperCase()}
+	</select>
+  
+	<insert id="batchInsert" parameterType="${basePackage}.entity.${table.name}">
+		INSERT INTO $TABLE_NAME (
+			$insertColumns
+		) VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			($insertValuesItem)
+		</foreach>
+	</insert>
+
+	<delete id="batchDelete">
+		DELETE FROM $TABLE_NAME WHERE ${table.opk.toUpperCase()} IN 
+		<foreach collection="array" item="item" open="(" separator="," close=")">
+			#{item.${table.pk}}
+		</foreach>
+	</delete>
+
+	<delete id="batchDeleteById">
+		DELETE FROM $TABLE_NAME WHERE ${table.opk.toUpperCase()} IN 
+		<foreach collection="array" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>
