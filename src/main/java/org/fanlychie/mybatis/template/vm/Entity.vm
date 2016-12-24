@@ -1,0 +1,11 @@
+package ${packname};
+
+public class ${table.name} implements Entity {
+	
+	private static final long serialVersionUID = 1L;
+	
+#fields #getset #tostring
+
+#equals($table.pk)
+
+}

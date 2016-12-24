@@ -1,0 +1,4 @@
+userdirective = org.fanlychie.mybatis.directive.GenerateFieldsDirective,\
+				org.fanlychie.mybatis.directive.GenerateGetSetDirective,\
+				org.fanlychie.mybatis.directive.GenerateToStringDirective,\
+				org.fanlychie.mybatis.directive.GenerateEqualsDirective

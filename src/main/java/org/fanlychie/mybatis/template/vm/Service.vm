@@ -1,0 +1,7 @@
+package ${packname};
+
+import ${epackage}.${table.name};
+
+public interface ${table.name}Service extends BaseService<${table.pkType}, ${table.name}> {
+
+}

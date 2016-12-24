@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+#set($TABLE_NAME = ${table.origin.toUpperCase()})
+<mapper namespace="${packname}.${table.name}Dao">
+#set($insertValues = "")
+#set($insertColumns = "")
+#set($insertValuesItem = "")
+#foreach($column in $table.columns)
+	#set($insertValues =  "$insertValues#{${column.name}}, ")
+	#set($insertValuesItem =  "$insertValuesItem#{item.${column.name}}, ")
+	#set($insertColumns =  "$insertColumns${column.origin.toUpperCase()}, ")
+#end
+#set($insertValuesActiveLength = $insertValues.length() - 2)
+#set($insertValues = $insertValues.substring(0, $insertValuesActiveLength))
+#set($insertValuesItemActiveLength = $insertValuesItem.length() - 2)
+#set($insertValuesItem = $insertValuesItem.substring(0, $insertValuesItemActiveLength))
+#set($insertColumnsActiveLength = $insertColumns.length() - 2)
+#set($insertColumns = $insertColumns.substring(0, $insertColumnsActiveLength))
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="${table.opk}" parameterType="${epackage}.${table.name}">
+		INSERT INTO $TABLE_NAME (
+			$insertColumns
+		) VALUES (
+			$insertValues
+		)
+	</insert>
+
+	<delete id="delete" parameterType="${epackage}.${table.name}">
+		DELETE FROM $TABLE_NAME <include refid="CriteriaSQL" />
+	</delete>
+
+	<update id="update" parameterType="${epackage}.${table.name}">
+		UPDATE $TABLE_NAME <include refid="SetSQL" /> <include refid="CriteriaSQL" />
+	</update>
+  
+	<select id="selectCount" parameterType="${epackage}.${table.name}" resultType="_long">
+		SELECT COUNT(1) FROM $TABLE_NAME <include refid="CriteriaSQL" />
+	</select>
+
+	<select id="selectList" parameterType="${epackage}.${table.name}" resultMap="${table.name}ResultMap">
+		SELECT * FROM $TABLE_NAME <include refid="CriteriaSQL" /> <include refid="OrderbySQL" /> <include refid="LimitSQL" />
+	</select>
+
+	<resultMap id="${table.name}ResultMap" type="${epackage}.${table.name}">
+		<id property="${table.pk}" column="${table.opk.toUpperCase()}" />
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+		<result property="${column.name}" column="${column.origin.toUpperCase()}" />
+#end
+#end
+	</resultMap>
+
+	<sql id="SetSQL">
+		<set>
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+			<if test="entity.${column.name} != null">${column.origin.toUpperCase()} = #{entity.${column.name}},</if>
+#end
+#end
+		</set>
+	</sql>
+
+	<sql id="CriteriaSQL">
+		<where>
+			<if test="criteria != null and criteria.notEmpty">
+				<foreach collection="criteria.criterions" item="criterion">
+					<choose>
+						<when test="criterion.noValue">
+							and ${criterion.field} ${criterion.condition}
+						</when>
+						<when test="criterion.singleValue">
+							and ${criterion.field} ${criterion.condition} #{criterion.value}
+						</when>
+						<when test="criterion.betweenValue">
+							and ${criterion.field} ${criterion.condition} #{criterion.value} and #{criterion.value2}
+						</when>
+						<when test="criterion.listValue">
+							and ${criterion.field} ${criterion.condition}
+							<foreach collection="criterion.value" item="item" open="(" separator="," close=")">
+								#{item}
+							</foreach>
+						</when>
+					</choose>
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<sql id="OrderbySQL">
+		<if test="criteria != null and criteria.orderly">
+			ORDER BY 
+			<foreach collection="criteria.orderbies" item="orderby" separator=",">
+				${orderby.field} ${orderby.value}
+			</foreach>
+		</if>
+	</sql>
+
+	<sql id="LimitSQL">
+		<if test="criteria != null and criteria.pagination">
+			LIMIT #{criteria.limit.value}, #{criteria.limit.value2}
+		</if>
+	</sql>
+
+</mapper>
