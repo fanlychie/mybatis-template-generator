@@ -1,18 +1,5 @@
 package org.fanlychie.mybatis;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -21,6 +8,17 @@ import org.fanlychie.mybatis.schema.Output;
 import org.fanlychie.mybatis.schema.Output.Item;
 import org.fanlychie.mybatis.schema.Scanner;
 import org.fanlychie.mybatis.schema.Schema;
+import org.fanlychie.mybatis.template.EntityTemplate;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * XML 配置文件解析器
@@ -112,22 +110,34 @@ public class ConfigXmlParser {
 		String packageName = e.attributeValue("value");
 		String pathname = packageName.replace(".", "/");
 		URL url = Thread.currentThread().getContextClassLoader().getResource(pathname);
-		if (url == null) {
-			throw new RuntimeException("can not found path : " + pathname);
-		}
-		File packageDir = new File(url.getPath());
-		if (!packageDir.isDirectory()) {
-			throw new RuntimeException(pathname + " is not a directory");
-		}
 		Set<String> fileSet = new HashSet<>();
-		File[] files = packageDir.listFiles();
-		if (files == null || files.length == 0) {
-			throw new RuntimeException("the directory " + pathname + " is empty");
-		}
-		for (File file : files) {
-			if (!file.isDirectory()) {
-				String fileName = file.getName();
-				fileSet.add(packageName + "." + fileName.substring(0, fileName.lastIndexOf(".")));
+		if (packageName.equals(EntityTemplate.class.getPackage().getName())) {
+			JarURLConnection conn = (JarURLConnection) url.openConnection();
+			Enumeration<JarEntry> es = conn.getJarFile().entries();
+			while (es.hasMoreElements()) {
+				String epathname = es.nextElement().getName();
+				if (epathname.startsWith(pathname) && epathname.endsWith(".class")) {
+					epathname = epathname.substring(0, epathname.indexOf(".class"));
+					fileSet.add(epathname.replace("/", "."));
+				}
+			}
+		} else {
+			if (url == null) {
+				throw new RuntimeException("can not found path : " + pathname);
+			}
+			File packageDir = new File(url.getPath());
+			if (!packageDir.isDirectory()) {
+				throw new RuntimeException(pathname + " is not a directory");
+			}
+			File[] files = packageDir.listFiles();
+			if (files == null || files.length == 0) {
+				throw new RuntimeException("the directory " + pathname + " is empty");
+			}
+			for (File file : files) {
+				if (!file.isDirectory()) {
+					String fileName = file.getName();
+					fileSet.add(packageName + "." + fileName.substring(0, fileName.lastIndexOf(".")));
+				}
 			}
 		}
 		scanner.setTemplateClasses(fileSet);
@@ -150,17 +160,17 @@ public class ConfigXmlParser {
 	private static Output parseOutput() {
 		Output output = new Output();
 		Element e = (Element) document.selectSingleNode("//output/property[@name='entity']");
-		output.setEntity(new Item(e.attributeValue("folder"), e.attributeValue("packname")));
+		output.setEntity(new Item(processBasedir(e.attributeValue("folder")), e.attributeValue("packname")));
 		e = (Element) document.selectSingleNode("//output/property[@name='dao']");
-		output.setDao(new Item(e.attributeValue("folder"), e.attributeValue("packname")));
+		output.setDao(new Item(processBasedir(e.attributeValue("folder")), e.attributeValue("packname")));
 		e = (Element) document.selectSingleNode("//output/property[@name='daoImpl']");
-		output.setDaoImpl(new Item(e.attributeValue("folder"), e.attributeValue("packname")));
+		output.setDaoImpl(new Item(processBasedir(e.attributeValue("folder")), e.attributeValue("packname")));
 		e = (Element) document.selectSingleNode("//output/property[@name='mapperXml']");
-		output.setMapperXml(new Item(e.attributeValue("folder"), e.attributeValue("packname")));
+		output.setMapperXml(new Item(processBasedir(e.attributeValue("folder")), e.attributeValue("packname")));
 		e = (Element) document.selectSingleNode("//output/property[@name='service']");
-		output.setService(new Item(e.attributeValue("folder"), e.attributeValue("packname")));
+		output.setService(new Item(processBasedir(e.attributeValue("folder")), e.attributeValue("packname")));
 		e = (Element) document.selectSingleNode("//output/property[@name='serviceImpl']");
-		output.setServiceImpl(new Item(e.attributeValue("folder"), e.attributeValue("packname")));
+		output.setServiceImpl(new Item(processBasedir(e.attributeValue("folder")), e.attributeValue("packname")));
 		return output;
 	}
 
@@ -204,6 +214,10 @@ public class ConfigXmlParser {
 			return str.replaceAll("\\*", ".*?");
 		}
 		return str;
+	}
+
+	private static String processBasedir(String str) {
+		return str.contains("${basedir}") ? str.replace("${basedir}", new File("").getAbsolutePath()) : str;
 	}
 
 }

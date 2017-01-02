@@ -1,14 +1,14 @@
 package org.fanlychie.mybatis.core;
 
-import java.io.StringWriter;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+
+import java.io.StringWriter;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * 模板引擎
@@ -66,7 +66,7 @@ public class TemplateEngine {
 		prop.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
 		prop.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8");
 		prop.put(RuntimeConstants.RESOURCE_LOADER, "classpath");
-		prop.load(ClassLoader.getSystemResourceAsStream("velocity.properites"));
+		prop.load(this.getClass().getResourceAsStream("/velocity.properites"));
 		prop.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		VelocityEngine engine = new VelocityEngine();
 		engine.init(prop);
