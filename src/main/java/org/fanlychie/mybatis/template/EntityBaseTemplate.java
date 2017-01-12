@@ -1,9 +1,9 @@
 package org.fanlychie.mybatis.template;
 
-import java.util.Map;
-
 import org.fanlychie.mybatis.ConfigXmlParser;
 import org.fanlychie.mybatis.Template;
+
+import java.util.Map;
 
 /**
  * 实体类标记接口模板
@@ -29,7 +29,7 @@ public class EntityBaseTemplate implements Template {
 
 	@Override
 	public boolean isForceOverride() {
-		return false;
+		return true;
 	}
 
 }
