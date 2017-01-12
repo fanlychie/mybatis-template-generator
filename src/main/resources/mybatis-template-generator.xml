@@ -7,7 +7,7 @@
         <property name="customName2" value="customValue2" />
     </properties>
 
-    <!-- [可选项] 引入资源文件, 可以通过 ${} 占位符引用资源文件的内容 -->
+    <!-- [可选项] 类路径下的文件相对路径, 在配置文件中可以通过 ${} 占位符来引用资源文件的内容 -->
     <properties location="jdbc.properties" />
 
     <!-- [必须项] 数据源配置 -->
