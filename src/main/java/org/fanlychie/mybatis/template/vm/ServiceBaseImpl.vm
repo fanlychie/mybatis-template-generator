@@ -79,10 +79,13 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
 			pagination.setLimit(10);
 		}
 		if (pagination.getSort() != null) {
-			if (pagination.getOrder() == null) {
-				pagination.setOrder("ASC");
+			String order = pagination.getOrder();
+			if (order == null) {
+				pagination.setOrder("asc");
 			}
-			((SimpleCriteria) criteria).orderBy(pagination.getSort(), pagination.getOrder());
+			if (order.equalsIgnoreCase("asc") || order.equalsIgnoreCase("desc")) {
+				((SimpleCriteria) criteria).orderBy(pagination.getSort(), order);
+			}
 		}
 		if (pagination.getField() != null) {
 			String searchValue = pagination.getSearch();
