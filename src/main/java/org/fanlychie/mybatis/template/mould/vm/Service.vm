@@ -1,0 +1,10 @@
+package ${packname};
+
+import ${epackage}.${table.name};
+
+/**
+ * ${table.comment}业务接口
+ */
+public interface ${table.name}Service extends BaseService<${table.primaryKey.type}, ${table.name}> {
+
+}

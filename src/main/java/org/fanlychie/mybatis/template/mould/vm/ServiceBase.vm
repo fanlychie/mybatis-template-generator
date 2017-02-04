@@ -1,0 +1,129 @@
+package ${packname};
+
+import java.io.Serializable;
+import java.util.List;
+
+import ${epackage}.Entity;
+import ${epackage}.Entity.Criteria;
+import ${epackage}.Entity.Pagination;
+
+/**
+ * 业务基类接口
+ * @param <K> 主键类型
+ * @param <E> 实体类型
+ */
+public interface BaseService<K extends Serializable, E extends Entity> {
+
+	/**
+     * 保存数据
+     *
+     * @param entity 实体类对象
+     * @return 返回保存的数据的主键, 保存失败返回 null (如果有可能)
+     */
+	K save(E entity);
+
+	/**
+     * 根据主键删除数据
+     *
+     * @param id 主键
+     * @return 删除成功返回 true, 否则返回 false
+     */
+	boolean delete(K id);
+
+	/**
+     * 根据条件删除数据
+     *
+     * @param criteria 条件对象
+     * @return 返回操作成功的记录条数
+     */
+	int delete(Criteria criteria);
+
+	/**
+     * 根据主键更新数据
+     *
+     * @param entity 含主键的实体类对象
+     * @return 更新成功返回 true, 否则返回 false
+     */
+	boolean update(E entity);
+
+	/**
+     * 根据条件更新数据
+     *
+     * @param entity   实体类对象
+     * @param criteria 条件对象
+     * @return 返回操作成功的记录条数
+     */
+	int update(E entity, Criteria criteria);
+
+	/**
+     * 根据主键查询唯一数据
+     *
+     * @param id 主键
+     * @return 返回查询的唯一结果数据, 如果没有则返回 null
+     */
+	E selectOne(K id);
+
+	/**
+     * 根据条件查询唯一数据
+     *
+     * @param criteria 条件对象
+     * @return 返回查询的唯一结果数据, 如果没有则返回 null
+     */
+	E selectOne(Criteria criteria);
+	
+	/**
+     * 查询所有数据
+     *
+     * @return 返回查询结果的数据集合
+     */
+	List<E> selectAll();
+
+	/**
+     * 根据条件查询数据
+     *
+     * @param criteria 条件对象
+     * @return 返回查询结果的数据集合
+     */
+	List<E> selectList(Criteria criteria);
+
+	/**
+     * 根据条件查询记录的条数
+     *
+     * @param criteria 条件对象
+     * @return 返回查询结果的记录条数
+     */
+	long selectCount(Criteria criteria);
+	
+	/**
+     * 分页查询, 支持 bootstrap 分页插件, 当 page 参数不为0时表明是普通分页, 否则为 bootstrap 分页.
+     * <p>
+     * bootstrap 分页使用的参数 (将 Pagination 对象作为 Controller 方法的参数, 即可接收插件发送的参数值):<p>
+     * rows(分页结果集合, 返回字段, 无需设值),<p>
+     * total (查询结果总条数, 返回字段, 无需设值),<p>
+     * limit (每页显示的条数, 非必须, 默认 10),<p>
+     * offset (查询的起始索引值, 非必须, 默认 0),<p>
+     * sort (排序字段的名称, 非必须),<p>
+     * order (排序的关键字, 非必须),<p>
+     * search (搜索的关键字, 非必须),<p>
+     * field (搜索字段名称, bootstrap 分页插件不发送此参数, 如果有需要, 需手工设置, 建议不使用此参数, 非必须).
+     * <p>
+     * 普通分页使用参数 (将 Pagination 对象作为 Controller 方法的参数, 即可接收插件发送的参数值):<p>
+     * rows(分页结果集合, 返回字段, 无需设值),<p>
+     * total (查询结果总条数, 返回字段, 无需设值),<p>
+     * limit (每页显示的条数, 非必须, 默认 10),<p>
+     * sort (排序字段的名称, 非必须, 默认 0),<p>
+     * order (排序的关键字, 非必须),<p>
+     * search (搜索的关键字, 非必须),<p>
+     * field (搜索字段名称, 非必须),<p>
+     * page (当前请求的页码, 必须设置, 页码从 1 开始),<p>
+     * prev (上一页的页码, 返回字段, 无需设值),<p>
+     * next (下一页的页码, 返回字段, 无需设值),<p>
+     * pages (查询结果总页数, 返回字段, 无需设值)
+     *
+     * @param criteria   条件对象
+     * @param pagination 分页对象参数
+     * @return 返回分页的对象
+     */
+	Pagination selectPage(Criteria criteria, Pagination pagination);
+	
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+#set($TABLE_NAME = ${table.origin.toUpperCase()}) ## 设值
+<mapper namespace="${packname}.${table.name}Dao">
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="${table.primaryKey.origin}" parameterType="${epackage}.${table.name}">
+		INSERT INTO $TABLE_NAME (
+			$util.getTableInsertColumns($table)
+		) VALUES (
+			$util.getTableInsertValues($table)
+		)
+	</insert>
+
+	<delete id="delete" parameterType="${epackage}.${table.name}">
+		DELETE FROM $TABLE_NAME <include refid="CriteriaSQL" />
+	</delete>
+
+	<update id="update" parameterType="${epackage}.${table.name}">
+		UPDATE $TABLE_NAME <include refid="SetSQL" /> <include refid="CriteriaSQL" />
+	</update>
+  
+	<select id="selectCount" parameterType="${epackage}.${table.name}" resultType="_long">
+		SELECT COUNT(1) FROM $TABLE_NAME <include refid="CriteriaSQL" />
+	</select>
+
+	<select id="selectList" parameterType="${epackage}.${table.name}" resultMap="${table.name}ResultMap">
+		SELECT * FROM $TABLE_NAME <include refid="CriteriaSQL" /> <include refid="OrderbySQL" /> <include refid="LimitSQL" />
+	</select>
+
+	<resultMap id="${table.name}ResultMap" type="${epackage}.${table.name}">
+		<id property="${table.primaryKey.name}" column="${table.primaryKey.origin.toUpperCase()}" />
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+		<result property="${column.name}" column="${column.origin.toUpperCase()}" />
+#end
+#end
+	</resultMap>
+
+	<sql id="SetSQL">
+		<set>
+#foreach($column in $table.columns)
+#if($column.name != $table.pk)
+			<if test="entity.${column.name} != null">${column.origin.toUpperCase()} = #{entity.${column.name}},</if>
+#end
+#end
+		</set>
+	</sql>
+
+	<sql id="CriteriaSQL">
+		<where>
+			<if test="criteria != null and criteria.notEmpty">
+				<foreach collection="criteria.criterions" item="criterion">
+					<choose>
+						<when test="criterion.noValue">
+							${criterion.operator} ${criterion.field} ${criterion.condition}
+						</when>
+						<when test="criterion.singleValue">
+							${criterion.operator} ${criterion.field} ${criterion.condition} #{criterion.value}
+						</when>
+						<when test="criterion.betweenValue">
+							${criterion.operator} ${criterion.field} ${criterion.condition} #{criterion.value} and #{criterion.constraint}
+						</when>
+						<when test="criterion.listValue">
+							${criterion.operator} ${criterion.field} ${criterion.condition}
+							<foreach collection="criterion.value" item="item" open="(" separator="," close=")">
+								#{item}
+							</foreach>
+						</when>
+					</choose>
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<sql id="OrderbySQL">
+		<if test="criteria != null and criteria.ordered">
+			ORDER BY 
+			<foreach collection="criteria.criterions" item="criterion" separator=",">
+				<if test="criterion.orderValue">
+					${criterion.field} ${criterion.value}
+				</if>
+			</foreach>
+		</if>
+	</sql>
+
+	<sql id="LimitSQL">
+		<if test="criteria != null and criteria.paged">
+			<foreach collection="criteria.criterions" item="criterion">
+				<if test="criterion.limitValue">
+					LIMIT #{criterion.value}, #{criterion.constraint}
+				</if>
+			</foreach>
+		</if>
+	</sql>
+
+</mapper>

@@ -1,0 +1,1432 @@
+package ${packname};
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 实体
+ */
+public interface Entity extends Serializable {
+
+#foreach($table in $tables) ## 循环语句开始
+    /**
+     * ${table.comment} SQL 条件查询
+     */
+    public static class ${table.name}Criteria extends Criteria {
+
+        /**
+         * 设置${table.primaryKey.comment}查询条件
+         *
+         * @param criterion 查询条件
+         * @return 返回查询条件对象
+         */
+        public Criterion set$util.capitalize($table.primaryKey.name)(Criterion criterion) {
+            return add(criterion.setField("${table.primaryKey.origin}"));
+        }
+
+#foreach($column in $table.columns) ## 循环语句开始
+        /**
+         * 设置${column.comment}查询条件
+         *
+         * @param criterion 查询条件
+         * @return 返回查询条件对象
+         */
+        public Criterion set$util.capitalize($column.name)(Criterion criterion) {
+            return add(criterion.setField("${column.origin}"));
+        }
+
+#end ## 循环语句结束
+
+    }
+
+#end ## 循环语句结束
+    /**
+     * 封装 SQL 查询标准
+     */
+    public static class Criterion {
+
+        /**
+         * SQL 字段
+         */
+        private String field;
+
+        /**
+         * 值域
+         */
+        private Object value;
+
+        /**
+         * 约束值
+         */
+        private Object constraint;
+
+        /**
+         * SQL 条件
+         */
+        private String condition;
+
+        /**
+         * 没有值的 SQL 片段
+         */
+        private boolean noValue;
+
+        /**
+         * 多值的 SQL 片段
+         */
+        private boolean listValue;
+
+        /**
+         * 排序的 SQL 片段
+         */
+        private boolean orderValue;
+
+        /**
+         * 分页的 SQL 片段
+         */
+        private boolean limitValue;
+
+        /**
+         * 单值的 SQL 片段
+         */
+        private boolean singleValue;
+
+        /**
+         * 区间的 SQL 片段
+         */
+        private boolean betweenValue;
+
+        /**
+         * 标记是否为空, 空时表示无效的
+         */
+        private boolean empty;
+
+        /**
+         * SQL 逻辑运算符
+         */
+        private String operator;
+
+        /**
+         * 获取 SQL 字段
+         *
+         * @return 返回 SQL 字段
+         */
+        public String getField() {
+            return field;
+        }
+
+        /**
+         * 获取值域
+         *
+         * @return 返回值域
+         */
+        public Object getValue() {
+            return value;
+        }
+
+        /**
+         * 获取约束值
+         *
+         * @return 返回约束值
+         */
+        public Object getConstraint() {
+            return constraint;
+        }
+
+        /**
+         * 获取 SQL 条件
+         *
+         * @return 返回 SQL 条件
+         */
+        public String getCondition() {
+            return condition;
+        }
+
+        /**
+         * 获取 SQL 逻辑运算符
+         *
+         * @return 返回 SQL 逻辑运算符
+         */
+        public String getOperator() {
+            return operator;
+        }
+
+        /**
+         * 是否是没有值的 SQL
+         *
+         * @return 是返回 true, 否则返回 false
+         */
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        /**
+         * 是否是多值的 SQL
+         *
+         * @return 是返回 true, 否则返回 false
+         */
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        /**
+         * 是否是排序的 SQL
+         *
+         * @return 是返回 true, 否则返回 false
+         */
+        public boolean isOrderValue() {
+            return orderValue;
+        }
+
+        /**
+         * 是否是分页的 SQL
+         *
+         * @return 是返回 true, 否则返回 false
+         */
+        public boolean isLimitValue() {
+            return limitValue;
+        }
+
+        /**
+         * 是否是单值的 SQL
+         *
+         * @return 是返回 true, 否则返回 false
+         */
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        /**
+         * 是否是区间的 SQL
+         *
+         * @return 是返回 true, 否则返回 false
+         */
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        /**
+         * 对象是否为空
+         *
+         * @return 空返回 true, 否则返回 false
+         */
+        public boolean isEmpty() {
+            return empty;
+        }
+
+        /**
+         * 设置 SQL 字段
+         *
+         * @param field SQL 字段
+         * @return 返回当前的对象
+         */
+        public Criterion setField(String field) {
+            this.field = field;
+            return this;
+        }
+
+        /**
+         * OR 逻辑
+         *
+         * @param criterion SQL 查询条件参数
+         * @return 返回当前的对象
+         */
+        public Criterion or(Criterion criterion) {
+            criterion.operator = Operator.OR.name();
+            return criterion;
+        }
+
+        /**
+         * AND 逻辑
+         *
+         * @param criterion SQL 查询条件参数
+         * @return 返回当前的对象
+         */
+        public Criterion and(Criterion criterion) {
+            criterion.operator = Operator.AND.name();
+            return criterion;
+        }
+
+        /**
+         * 设置为没有值的 SQL
+         *
+         * @return 返回当前对象
+         */
+        Criterion setNoValue() {
+            this.noValue = true;
+            return this;
+        }
+
+        /**
+         * 设置为多值的 SQL
+         *
+         * @return 返回当前对象
+         */
+        Criterion setListValue() {
+            this.listValue = true;
+            return this;
+        }
+
+        /**
+         * 设置为排序的 SQL
+         *
+         * @return 返回当前对象
+         */
+        Criterion setOrderValue() {
+            this.orderValue = true;
+            return this;
+        }
+
+        /**
+         * 设置为分页的 SQL
+         *
+         * @return 返回当前对象
+         */
+        Criterion setLimitValue() {
+            this.limitValue = true;
+            return this;
+        }
+
+        /**
+         * 设置为单值的 SQL
+         *
+         * @return 返回当前对象
+         */
+        Criterion setSingleValue() {
+            this.singleValue = true;
+            return this;
+        }
+
+        /**
+         * 设置为区间的 SQL
+         *
+         * @return 返回当前对象
+         */
+        Criterion setBetweenValue() {
+            this.betweenValue = true;
+            return this;
+        }
+
+        /**
+         * 私有化构造方法, 通过 Builder 来构建此对象
+         */
+        Criterion() {
+            this.empty = true;
+        }
+
+        /**
+         * 创建一个封装的 SQL 查询标准对象
+         *
+         * @param field      SQL 字段
+         * @param condition  SQL 条件
+         * @param value      值域
+         * @param constraint 约束值
+         */
+        Criterion(String field, Condition condition, Object value, Object constraint) {
+            this.field = field;
+            this.value = value;
+            this.constraint = constraint;
+            this.operator = Operator.AND.name();
+            this.condition = condition.getSymbol();
+        }
+
+    }
+
+    /**
+     * 封装 SQL 查询标准构建器
+     */
+    public static final class Builder {
+
+        /**
+         * 空对象
+         */
+        private static final Criterion EMPTY = new Criterion();
+
+        /**
+         * 日志
+         */
+        private static Log log = LogFactory.getLog(Builder.class);
+
+        /**
+         * 构建没有值的 SQL 查询标准
+         *
+         * @param condition SQL 条件
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildNoValueCriterion(Condition condition) {
+            return buildNoValueCriterion(null, condition);
+        }
+
+        /**
+         * 构建没有值的 SQL 查询标准
+         *
+         * @param field     SQL 字段
+         * @param condition SQL 条件
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildNoValueCriterion(String field, Condition condition) {
+            if (condition == null) {
+                log.warn("构建没有值的 SQL 查询标准, 条件为 null");
+                return EMPTY;
+            }
+            return new Criterion(field, condition, null, null).setNoValue();
+        }
+
+        /**
+         * 构建多值的 SQL 查询标准
+         *
+         * @param condition SQL 条件
+         * @param value     值域
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildListValueCriterion(Condition condition, Object value) {
+            return buildListValueCriterion(null, condition, value);
+        }
+
+        /**
+         * 构建多值的 SQL 查询标准
+         *
+         * @param field     SQL 字段
+         * @param condition SQL 条件
+         * @param value     值集合
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildListValueCriterion(String field, Condition condition, Object value) {
+            if (condition == null) {
+                log.warn("构建多值的 SQL 查询标准, 条件为 null");
+                return EMPTY;
+            }
+            if (value == null) {
+                log.warn("构建多值的 SQL 查询标准, 值域为 null");
+                return EMPTY;
+            }
+            if (!(value instanceof Collection) && !(value.getClass().isArray())) {
+                log.warn("构建多值的 SQL 查询标准, 值域不是有效的集合: " + value);
+                return EMPTY;
+            }
+            return new Criterion(field, condition, value, null).setListValue();
+        }
+
+        /**
+         * 构建排序的 SQL 查询标准
+         *
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildOrderValueCriterion(OrderBy orderBy) {
+            return buildOrderValueCriterion(null, orderBy);
+        }
+
+        /**
+         * 构建排序的 SQL 查询标准
+         *
+         * @param field   SQL 字段
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildOrderValueCriterion(String field, OrderBy orderBy) {
+            if (orderBy == null) {
+                log.warn("构建排序的 SQL 查询标准, 排序关键字对象为 null");
+                return EMPTY;
+            }
+            return new Criterion(field, Condition.ORDER_BY, orderBy.name(), null).setOrderValue();
+        }
+
+        /**
+         * 构建排序的 SQL 查询标准
+         *
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildOrderValueCriterion(String orderBy) {
+            return buildOrderValueCriterion(null, orderBy);
+        }
+
+        /**
+         * 构建排序的 SQL 查询标准
+         *
+         * @param field   SQL 字段
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildOrderValueCriterion(String field, String orderBy) {
+            if (orderBy == null) {
+                log.warn("构建排序的 SQL 查询标准, 排序关键字为 null");
+                return EMPTY;
+            }
+            if (orderBy.isEmpty()) {
+                log.warn("构建排序的 SQL 查询标准, 排序关键字为空");
+                return EMPTY;
+            }
+            if (!orderBy.equalsIgnoreCase(OrderBy.ASC.name()) && !orderBy.equalsIgnoreCase(OrderBy.DESC.name())) {
+                log.warn("构建排序的 SQL 查询标准, 排序关键字非法: " + orderBy);
+                return EMPTY;
+            }
+            return new Criterion(field, Condition.ORDER_BY, orderBy, null).setOrderValue();
+        }
+
+        /**
+         * 构建分页的 SQL 查询标准
+         *
+         * @param offset 起始索引值
+         * @param count  查询条数值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildLimitValueCriterion(int offset, int count) {
+            if (offset < 0) {
+                log.warn("构建分页的 SQL 查询标准, 起始索引值不是有效的整数值: " + offset);
+                return EMPTY;
+            }
+            if (count <= 0) {
+                log.warn("构建分页的 SQL 查询标准, 查询条数值不是有效的正整数: " + count);
+                return EMPTY;
+            }
+            return new Criterion(null, Condition.LIMIT, offset, count).setLimitValue();
+        }
+
+        /**
+         * 构建单值的 SQL 查询标准
+         *
+         * @param condition SQL 条件
+         * @param value     值域
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildSingleValueCriterion(Condition condition, Object value) {
+            return buildSingleValueCriterion(null, condition, value);
+        }
+
+        /**
+         * 构建单值的 SQL 查询标准
+         *
+         * @param field     SQL 字段
+         * @param condition SQL 条件
+         * @param value     值域
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildSingleValueCriterion(String field, Condition condition, Object value) {
+            if (condition == null) {
+                log.warn("构建单值的 SQL 查询标准, 条件为 null");
+                return EMPTY;
+            }
+            if (value == null) {
+                log.warn("构建单值的 SQL 查询标准, 值域为 null");
+                return EMPTY;
+            }
+            return new Criterion(field, condition, value, null).setSingleValue();
+        }
+
+        /**
+         * 构建区间的 SQL 查询标准
+         *
+         * @param value1 左区间值
+         * @param value2 右区间值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildBetweenValueCriterion(Object value1, Object value2) {
+            return buildBetweenValueCriterion(null, value1, value2);
+        }
+
+        /**
+         * 构建区间的 SQL 查询标准
+         *
+         * @param field  SQL 字段
+         * @param value1 左区间值
+         * @param value2 右区间值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion buildBetweenValueCriterion(String field, Object value1, Object value2) {
+            if (value1 == null) {
+                log.warn("构建区间的 SQL 查询标准, 左区间值为 null");
+                return EMPTY;
+            }
+            if (value2 == null) {
+                log.warn("构建区间的 SQL 查询标准, 右区间值为 null");
+                return EMPTY;
+            }
+            return new Criterion(field, Condition.BETWEEN, value1, value2).setBetweenValue();
+        }
+
+        /**
+         * 私有化构造方法
+         */
+        private Builder() {
+
+        }
+
+    }
+
+    /**
+     * 条件查询值
+     */
+    public static final class Value {
+
+        /**
+         * 等于
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion eq(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.EQ, value);
+        }
+
+        /**
+         * 不等于
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion ne(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.NE, value);
+        }
+
+        /**
+         * 大于等于
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion ge(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.GE, value);
+        }
+
+        /**
+         * 大于
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion gt(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.GT, value);
+        }
+
+        /**
+         * 小于等于
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion le(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.LE, value);
+        }
+
+        /**
+         * 小于
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion lt(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.LT, value);
+        }
+
+        /**
+         * 模糊查询
+         *
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion like(Object value) {
+            return Builder.buildSingleValueCriterion(Condition.LIKE, value);
+        }
+
+        /**
+         * 查询字段为 null
+         *
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion isNull() {
+            return Builder.buildNoValueCriterion(Condition.IS_NULL);
+        }
+
+        /**
+         * 查询字段为非 null
+         *
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion isNotNull() {
+            return Builder.buildNoValueCriterion(Condition.IS_NOT_NULL);
+        }
+
+        /**
+         * 区间查询
+         *
+         * @param value1 左区间值
+         * @param value2 右区间值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion between(Object value1, Object value2) {
+            return Builder.buildBetweenValueCriterion(value1, value2);
+        }
+
+        /**
+         * 排序字段
+         *
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion orderBy(OrderBy orderBy) {
+            return Builder.buildOrderValueCriterion(orderBy);
+        }
+
+        /**
+         * 排序字段
+         *
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public static Criterion orderBy(String orderBy) {
+            return Builder.buildOrderValueCriterion(orderBy);
+        }
+
+        /**
+         * 查询范围
+         *
+         * @param values 值
+         * @param <T>    限定值为同类型
+         * @return 返回封装的 SQL 查询标准
+         */
+        @SuppressWarnings("unchecked")
+        public static <T> Criterion in(T... values) {
+            return Builder.buildListValueCriterion(Condition.IN, values);
+        }
+
+        /**
+         * 查询不在范围内的记录
+         *
+         * @param values 值
+         * @param <T>    限定值为同类型
+         * @return 返回封装的 SQL 查询标准
+         */
+        @SuppressWarnings("unchecked")
+        public static <T> Criterion notIn(T... values) {
+            return Builder.buildListValueCriterion(Condition.NOT_IN, values);
+        }
+
+        /**
+         * 私有化构造方法
+         */
+        private Value() {
+
+        }
+
+    }
+
+    /**
+     * 封装 SQL 查询标准
+     */
+    public static abstract class Criteria {
+
+        /**
+         * 可分页的
+         */
+        private boolean paged;
+
+        /**
+         * 可排序的
+         */
+        private boolean ordered;
+
+        /**
+         * SQL 查询标准集合
+         */
+        private List<Criterion> criterions;
+
+        /**
+         * SQL 查询参数
+         */
+        private Map<String, Object> params;
+
+        /**
+         * 构造方法
+         */
+        public Criteria() {
+            criterions = new LinkedList<>();
+            params = new HashMap<>();
+            params.put(Criteria.class.getSimpleName().toLowerCase(), this);
+        }
+
+        /**
+         * 是否是可分页的
+         *
+         * @return 分页返回 true, 否则返回 false
+         */
+        public boolean isPaged() {
+            return paged;
+        }
+
+        /**
+         * 是否是可排序的
+         *
+         * @return 排序返回 true, 否则返回 false
+         */
+        public boolean isOrdered() {
+            return ordered;
+        }
+
+        /**
+         * SQL 查询标准是否为空, 空时不使用封装的 SQL 标准查询
+         *
+         * @return 非空返回 true, 否则返回 false
+         */
+        public boolean isNotEmpty() {
+            return criterions.size() > 0;
+        }
+
+        /**
+         * 获取封装的 SQL 标准查询集合
+         *
+         * @return 返回封装的 SQL 标准查询集合
+         */
+        public List<Criterion> getCriterions() {
+            return criterions;
+        }
+
+        /**
+         * 添加查询
+         *
+         * @param criterion 封装的 SQL 标准查询对象
+         * @return 返回当前对象
+         */
+        public Criteria addCriterion(Criterion criterion) {
+            if (!criterion.isEmpty()) {
+                if (criterion.isLimitValue()) {
+                    this.paged = true;
+                }
+                if (criterion.isOrderValue()) {
+                    this.ordered = true;
+                }
+                criterions.add(criterion);
+            }
+            return this;
+        }
+
+        /**
+         * 添加 SQL 查询参数
+         *
+         * @param name  参数名称
+         * @param value 参数的值
+         */
+        public void addSelectedParam(String name, Object value) {
+            params.put(name, value);
+        }
+
+        /**
+         * 获取 SQL 查询参数
+         *
+         * @return 返回 SQL 查询参数
+         */
+        public Map<String, Object> getSelectedParams() {
+            return params;
+        }
+
+        /**
+         * 添加查询
+         *
+         * @param criterion 封装的 SQL 标准查询对象
+         * @return 返回参数对象
+         */
+        protected Criterion add(Criterion criterion) {
+            addCriterion(criterion);
+            return criterion;
+        }
+
+    }
+
+    /**
+     * 简单的 SQL 查询标准实现
+     */
+    public static class SimpleCriteria extends Criteria {
+
+        /**
+         * 等于
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria eq(String field, Object value) {
+            return addCriterion(Value.eq(value).setField(field));
+        }
+
+        /**
+         * 不等于
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria ne(String field, Object value) {
+            return addCriterion(Value.ne(value).setField(field));
+        }
+
+        /**
+         * 大于等于
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria ge(String field, Object value) {
+            return addCriterion(Value.ge(value).setField(field));
+        }
+
+        /**
+         * 大于
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria gt(String field, Object value) {
+            return addCriterion(Value.gt(value).setField(field));
+        }
+
+        /**
+         * 小于等于
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria le(String field, Object value) {
+            return addCriterion(Value.le(value).setField(field));
+        }
+
+        /**
+         * 小于
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria lt(String field, Object value) {
+            return addCriterion(Value.lt(value).setField(field));
+        }
+
+        /**
+         * 查询字段为 null
+         *
+         * @param field SQL 字段
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria isNull(String field) {
+            return addCriterion(Value.isNull().setField(field));
+        }
+
+        /**
+         * 查询字段为非 null
+         *
+         * @param field SQL 字段
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria isNotNull(String field) {
+            return addCriterion(Value.isNotNull().setField(field));
+        }
+
+        /**
+         * 区间查询
+         *
+         * @param field  SQL 字段
+         * @param value1 左区间值
+         * @param value2 右区间值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria between(String field, Object value1, Object value2) {
+            return addCriterion(Value.between(value1, value2).setField(field));
+        }
+
+        /**
+         * 模糊查询
+         *
+         * @param field SQL 字段
+         * @param value 值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria like(String field, Object value) {
+            return addCriterion(Value.like(value).setField(field));
+        }
+
+        /**
+         * 排序字段
+         *
+         * @param field   SQL 字段
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria orderBy(String field, OrderBy orderBy) {
+            return addCriterion(Value.orderBy(orderBy).setField(field));
+        }
+
+        /**
+         * 排序字段
+         *
+         * @param field   SQL 字段
+         * @param orderBy 排序
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria orderBy(String field, String orderBy) {
+            return addCriterion(Value.orderBy(orderBy).setField(field));
+        }
+
+        /**
+         * 分页查询
+         *
+         * @param offset 起始索引值
+         * @param count  查询条数值
+         * @return 返回封装的 SQL 查询标准
+         */
+        public Criteria limit(int offset, int count) {
+            return addCriterion(Builder.buildLimitValueCriterion(offset, count));
+        }
+
+        /**
+         * 查询范围
+         *
+         * @param field  SQL 字段
+         * @param values 值
+         * @param <T>    限定值为同类型
+         * @return 返回封装的 SQL 查询标准
+         */
+        @SuppressWarnings("unchecked")
+        public <T> Criteria in(String field, T... values) {
+            return addCriterion(Value.in(values).setField(field));
+        }
+
+        /**
+         * 查询不在范围内的记录
+         *
+         * @param field  SQL 字段
+         * @param values 值
+         * @param <T>    限定值为同类型
+         * @return 返回封装的 SQL 查询标准
+         */
+        @SuppressWarnings("unchecked")
+        public <T> Criteria notIn(String field, T... values) {
+            return addCriterion(Value.notIn(values).setField(field));
+        }
+
+    }
+
+    /**
+     * 分页, 支持 bootstrap 分页插件
+     */
+    public static class Pagination {
+
+        /**
+         * 当前页的行数据集合
+         *
+         * bootstrap 特有, 普通分页可用
+         */
+        private List<?> rows;
+
+        /**
+         * SQL 查询的总记录条数
+         *
+         * bootstrap 特有, 普通分页可用
+         */
+        private long total;
+
+        /**
+         * 每页显示的数据条数, 每次从数据库查询此参数指定的记录条数
+         *
+         * 和 offset 参数组合使用, 参考 offset 描述
+         *
+         * bootstrap 特有, 普通分页可用
+         */
+        private int limit;
+
+        /**
+         * 起始索引的数值, 每次从查询结果中以此参数指定的值开始筛选.
+         *
+         * 和 limit 参数组合使用, 转换成 SQL 表示为: LIMIT offset, limit
+         *
+         * bootstrap 特有
+         */
+        private int offset;
+
+        /**
+         * 排序字段名称
+         *
+         * 和 order 参数组合使用, 参考 order 描述
+         *
+         * bootstrap 特有
+         */
+        private String sort;
+
+        /**
+         * 排序, ASC(asc) 或 DESC(desc)
+         *
+         * 和 sort 参数组合使用, 转换成 SQL 表示为: ORDER BY sort order
+         *
+         * bootstrap 特有
+         */
+        private String order;
+
+        /**
+         * 检索的字段的值
+         *
+         * 和 field 参数组合使用, 参考 field 描述
+         *
+         * bootstrap 特有
+         */
+        private String search;
+
+        /**
+         * 检索的字段名称
+         *
+         * 和 search 参数组合使用, 转换成 SQL 表示为: WHERE file LIKE search
+         *
+         * bootstrap 分页可用
+         */
+        private String field;
+
+        /**
+         * 当前页码, 起始页码从 1 开始
+         *
+         * 普通分页参数
+         */
+        private int page;
+
+        /**
+         * 上一页的页码
+         *
+         * 普通分页参数
+         */
+        private int prev;
+
+        /**
+         * 下一页的页码
+         *
+         * 普通分页参数
+         */
+        private int next;
+
+        /**
+         * 分页的总页数
+         *
+         * 普通分页参数
+         */
+        private int pages;
+
+        /**
+         * 额外的字段检索参数对照表
+         */
+        private Map<String, String> params;
+
+        /**
+         * 获取当前页的行数据集合
+         *
+         * @return 返回当前页的行数据集合
+         */
+        public List<?> getRows() {
+            return rows;
+        }
+
+        /**
+         * 设置当前页的行数据集合
+         *
+         * @param rows 当前页的行数据集合
+         */
+        public void setRows(List<?> rows) {
+            this.rows = rows;
+        }
+
+        /**
+         * 获取 SQL 查询的总记录条数
+         *
+         * @return 返回 SQL 查询的总记录条数
+         */
+        public long getTotal() {
+            return total;
+        }
+
+        /**
+         * 设置 SQL 查询的总记录条数
+         *
+         * @param total SQL 查询的总记录条数
+         */
+        public void setTotal(long total) {
+            this.total = total;
+        }
+
+        /**
+         * 获取每页显示的数据条数
+         *
+         * @return 返回每页显示的数据条数
+         */
+        public int getLimit() {
+            return limit;
+        }
+
+        /**
+         * 设置每页显示的数据条数
+         *
+         * @param limit 每页显示的数据条数
+         */
+        public void setLimit(int limit) {
+            this.limit = limit;
+        }
+
+        /**
+         * 获取起始索引的数值
+         *
+         * @return 返回起始索引的数值
+         */
+        public int getOffset() {
+            return offset;
+        }
+
+        /**
+         * 设置起始索引的数值
+         *
+         * @param offset 起始索引的数值
+         */
+        public void setOffset(int offset) {
+            this.offset = offset;
+        }
+
+        /**
+         * 获取排序字段名称
+         *
+         * @return 返回排序字段名称
+         */
+        public String getSort() {
+            return sort;
+        }
+
+        /**
+         * 设置排序字段名称
+         *
+         * @param sort 排序字段名称
+         */
+        public void setSort(String sort) {
+            if (sort != null) {
+                char ch;
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < sort.length(); i++) {
+                    ch = sort.charAt(i);
+                    if (Character.isUpperCase(ch)) {
+                        builder.append("_").append((char) (ch + 32));
+                    } else {
+                        builder.append(ch);
+                    }
+                }
+                sort = builder.toString();
+            }
+            this.sort = sort;
+        }
+
+        /**
+         * 获取排序关键字
+         *
+         * @return 返回排序关键字
+         */
+        public String getOrder() {
+            return order;
+        }
+
+        /**
+         * 设置排序关键字
+         *
+         * @param order 排序关键字
+         */
+        public void setOrder(String order) {
+            this.order = order;
+        }
+
+        /**
+         * 获取检索的字段的值
+         *
+         * @return 返回检索的字段的值
+         */
+        public String getSearch() {
+            return search;
+        }
+
+        /**
+         * 设置检索的字段的值
+         *
+         * @param search 检索的字段的值
+         */
+        public void setSearch(String search) {
+            this.search = search;
+        }
+
+        /**
+         * 获取检索的字段名称
+         *
+         * @return 返回检索的字段名称
+         */
+        public String getField() {
+            return field;
+        }
+
+        /**
+         * 设置检索的字段名称
+         *
+         * @param field 检索的字段名称
+         */
+        public void setField(String field) {
+            this.field = field;
+        }
+
+        /**
+         * 获取当前页码
+         *
+         * @return 返回当前页码
+         */
+        public int getPage() {
+            return page;
+        }
+
+        /**
+         * 设置当前页码
+         *
+         * @param page 当前页码
+         */
+        public void setPage(int page) {
+            this.page = page;
+        }
+
+        /**
+         * 获取上一页的页码
+         *
+         * @return 返回上一页的页码
+         */
+        public int getPrev() {
+            return prev;
+        }
+
+        /**
+         * 设置上一页的页码
+         *
+         * @param prev 上一页的页码
+         */
+        public void setPrev(int prev) {
+            this.prev = prev;
+        }
+
+        /**
+         * 获取下一页的页码
+         *
+         * @return 返回下一页的页码
+         */
+        public int getNext() {
+            return next;
+        }
+
+        /**
+         * 设置下一页的页码
+         *
+         * @param next 下一页的页码
+         */
+        public void setNext(int next) {
+            this.next = next;
+        }
+
+        /**
+         * 获取分页的总页数
+         *
+         * @return 返回分页的总页数
+         */
+        public int getPages() {
+            return pages;
+        }
+
+        /**
+         * 设置分页的总页数
+         *
+         * @param pages 分页的总页数
+         */
+        public void setPages(int pages) {
+            this.pages = pages;
+        }
+
+        /**
+         * 获取额外的字段检索参数对照表
+         *
+         * @return 返回额外的字段检索参数对照表
+         */
+        public Map<String, String> getParams() {
+            return params;
+        }
+
+        /**
+         * 设置额外的字段检索参数对照表
+         *
+         * @param params 额外的字段检索参数对照表
+         */
+        public void setParams(Map<String, String> params) {
+            this.params = params;
+        }
+
+    }
+
+    /**
+     * 条件枚举
+     */
+    public static enum Condition {
+
+        LT("<"), EQ("="), GT(">"), LE("<="), NE("!="), GE(">="),
+
+        IN("IN"), NOT_IN("NOT IN"), IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL"),
+
+        LIMIT("LIMIT"), ORDER_BY("ORDER BY"), LIKE("LIKE"), BETWEEN("BETWEEN");
+
+        /**
+         * 符号
+         */
+        private final String symbol;
+
+        /**
+         * 创建一个条件枚举
+         *
+         * @param symbol 符号
+         */
+        private Condition(String symbol) {
+            this.symbol = symbol;
+        }
+
+        /**
+         * 获取条件符号
+         *
+         * @return 返回条件符号
+         */
+        public String getSymbol() {
+            return symbol;
+        }
+
+    }
+
+    /**
+     * 逻辑运算符枚举
+     */
+    public static enum Operator { OR, AND }
+
+    /**
+     * 排序枚举
+     */
+    public static enum OrderBy { ASC, DESC }
+
+    /**
+     * 唯一键
+     *
+     * @return 返回实体类的唯一键名称
+     */
+    String uniqueKey();
+
+    /**
+     * 唯一键的值
+     *
+     * @return 返回实体类唯一键的值
+     */
+    Object uniqueVal();
+
+}

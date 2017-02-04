@@ -1,0 +1,187 @@
+package ${packname};
+
+import ${dpackage}.BaseDao;
+import ${epackage}.Entity;
+import ${epackage}.Entity.Criteria;
+import ${epackage}.Entity.SimpleCriteria;
+import org.apache.ibatis.exceptions.TooManyResultsException;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
+import java.util.List;
+
+/**
+ * 数据访问层基类接口实现类
+ *
+ * @param <K> 主键类型
+ * @param <E> 实体类型
+ */
+@SuppressWarnings("unchecked")
+public class BaseDaoImpl<K extends Serializable, E extends Entity> implements BaseDao<K, E> {
+
+    /**
+     * 实体对象
+     */
+    private Entity entity;
+
+    /**
+     * 实体类对象
+     */
+    private Class<E> entityClass;
+
+    /**
+     * 注入
+     */
+    @Autowired
+    protected SqlSessionTemplate sqlSessionTemplate;
+
+	/**
+	 * 保存数据
+	 * 
+	 * @param entity 实体类对象
+	 * @return 返回保存的数据的主键
+	 */
+    @Override
+    public K save(E entity) {
+        return sqlSessionTemplate.insert(statement("save"), entity) == 1 ? (K) entity.uniqueVal() : null;
+    }
+
+	/**
+	 * 根据主键删除数据
+	 * 
+	 * @param id 主键
+	 * @return 返回操作成功的记录条数
+	 */
+    @Override
+    public int delete(K id) {
+        return delete(new SimpleCriteria().eq(entity.uniqueKey(), id));
+    }
+
+	/**
+	 * 根据条件删除数据
+	 * 
+	 * @param criteria 条件对象
+	 * @return 返回操作成功的记录条数
+	 */
+    @Override
+    public int delete(Criteria criteria) {
+        return sqlSessionTemplate.delete(statement("delete"), criteria.getSelectedParams());
+    }
+
+	/**
+	 * 根据主键更新数据
+	 * 
+	 * @param entity 含主键的实体类对象
+	 * @return 返回操作成功的记录条数
+	 */
+    @Override
+    public int update(E entity) {
+        return update(entity, new SimpleCriteria().eq(entity.uniqueKey(), entity.uniqueVal()));
+    }
+
+	/**
+	 * 根据条件更新数据
+	 * 
+	 * @param entity   实体类对象
+	 * @param criteria 条件对象
+	 * @return 返回操作成功的记录条数
+	 */
+    @Override
+    public int update(E entity, Criteria criteria) {
+        criteria.addSelectedParam("entity", entity);
+        return sqlSessionTemplate.update(statement("update"), criteria.getSelectedParams());
+    }
+
+	/**
+	 * 根据主键查询唯一数据
+	 * 
+	 * @param id 主键
+	 * @return 返回查询的唯一结果数据
+	 */
+    @Override
+    public E selectOne(K id) {
+        return selectOne(new SimpleCriteria().eq(entity.uniqueKey(), id));
+    }
+
+	/**
+	 * 根据条件查询唯一数据
+	 * 
+	 * @param criteria 条件对象
+	 * @return 返回查询的唯一结果数据
+	 */
+    @Override
+    public E selectOne(Criteria criteria) {
+        List<E> list = selectList(criteria);
+        if (list == null) {
+            return null;
+        }
+        int size = list.size();
+        if (size == 0) {
+            return null;
+        }
+        if (size == 1) {
+            return list.get(0);
+        }
+        if (size > 1) {
+            throw new TooManyResultsException("Expected 1 result (or null) to be returned, but found " + size);
+        }
+        return null;
+    }
+	
+	/**
+	 * 查询所有数据
+	 * 
+	 * @return 返回查询结果的数据集合
+	 */
+    @Override
+    public List<E> selectAll() {
+        return selectList(null);
+    }
+
+	/**
+	 * 根据条件查询数据
+	 * 
+	 * @param criteria 条件对象
+	 * @return 返回查询结果的数据集合
+	 */
+    @Override
+    public List<E> selectList(Criteria criteria) {
+        return sqlSessionTemplate.selectList(statement("selectList"), criteria == null ? null : criteria.getSelectedParams());
+    }
+
+	/**
+	 * 根据条件查询记录的条数
+	 * 
+	 * @param criteria 条件对象
+	 * @return 返回查询结果的记录条数
+	 */
+    @Override
+    public long selectCount(Criteria criteria) {
+        return sqlSessionTemplate.selectOne(statement("selectCount"), criteria == null ? null : criteria.getSelectedParams());
+    }
+
+	/**
+	 * 根据 id 获取 SQL 语句
+	 * 
+	 * @param id 配置文件 SQL 语句 ID
+	 * @return 返回命名空间下的 SQL 语句
+	 */
+    protected String statement(String id) {
+        return String.format("${dpackage}.%sDao.%s", entityClass.getSimpleName(), id);
+    }
+
+	/**
+	 * 首次实例化的初始化工作
+	 */
+    {
+        entityClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+        try {
+            entity = entityClass.newInstance();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+}

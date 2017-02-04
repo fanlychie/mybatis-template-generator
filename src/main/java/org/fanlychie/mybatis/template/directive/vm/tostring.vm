@@ -1,0 +1,19 @@
+#set($_count = 1) ## 设值
+#set($_size = $columns.size()) ## 设值
+@Override
+	public String toString() {
+#if($_size == 1) ## if 语句开始
+		return "$columns.get(0).name = " + $columns.get(0).name;
+#else ## else 语句开始
+		StringBuilder builder = new StringBuilder();
+#foreach($column in $_columns) ## 循环语句开始
+#if($_count == $_size) ## if 语句开始
+		builder.append("$column.name = ").append($column.name);
+#else ## else 语句开始
+		builder.append("$column.name = ").append($column.name).append(", ");
+#end ## if else 语句结束
+#set($_count = $_count + 1) ## 设值
+#end ## 循环语句结束
+#end ## 结束
+		return builder.toString();
+	}

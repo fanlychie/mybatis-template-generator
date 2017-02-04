@@ -1,4 +1,4 @@
-userdirective = org.fanlychie.mybatis.directive.GenerateFieldsDirective,\
-				org.fanlychie.mybatis.directive.GenerateGetSetDirective,\
-				org.fanlychie.mybatis.directive.GenerateToStringDirective,\
-				org.fanlychie.mybatis.directive.GenerateEqualsDirective
+userdirective = org.fanlychie.mybatis.template.directive.FieldsDirective,\
+				org.fanlychie.mybatis.template.directive.EqualsDirective,\
+				org.fanlychie.mybatis.template.directive.GetSetDirective,\
+				org.fanlychie.mybatis.template.directive.ToStringDirective

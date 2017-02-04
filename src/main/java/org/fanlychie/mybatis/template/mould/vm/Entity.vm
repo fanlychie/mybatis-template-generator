@@ -1,0 +1,31 @@
+package ${packname};
+
+/**
+ * ${table.comment}
+ */
+public class ${table.name} implements Entity {
+
+	private static final long serialVersionUID = 1L;
+
+#fields #getset
+    /**
+     * 唯一键
+     *
+     * @return 返回实体类的唯一键名称
+     */
+	@Override
+	public String uniqueKey() {
+		return "${table.primaryKey.origin}";
+	}
+
+    /**
+     * 唯一键的值
+     *
+     * @return 返回实体类唯一键的值
+     */
+	@Override
+	public Object uniqueVal() {
+		return ${table.primaryKey.name};
+	}
+
+}

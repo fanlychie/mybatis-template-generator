@@ -1,0 +1,10 @@
+package ${packname};
+
+import ${epackage}.${table.name};
+
+/**
+ * ${table.comment}数据访问接口
+ */
+public interface ${table.name}Dao extends BaseDao<${table.primaryKey.type}, ${table.name}> {
+
+}

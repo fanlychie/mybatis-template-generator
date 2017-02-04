@@ -1,0 +1,69 @@
+#if($util.isNull($_params)) ## if 语句开始
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+#foreach($column in $columns) ## 循环语句开始
+		result = prime * result + (($column.name == null) ? 0 : ${column.name}.hashCode());
+#end ## 循环语句结束
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		$table.name other = ($table.name) obj;
+#foreach($column in $columns) ## 循环语句开始
+		if ($column.name == null) {
+			if (other.${column.name} != null) {
+				return false;
+			}
+		} else if (!${column.name}.equals(other.${column.name})) {
+			return false;
+		}
+#end ## 循环语句结束
+		return true;
+	}
+#else ## else 语句开始
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+#foreach($_param in $_params) ## 循环语句开始
+		result = prime * result + (($_param == null) ? 0 : ${_param}.hashCode());
+#end ## 循环语句结束
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		$table.name other = ($table.name) obj;
+#foreach($_param in $_params) ## 循环语句开始
+		if ($_param == null) {
+			if (other.${_param} != null) {
+				return false;
+			}
+		} else if (!${_param}.equals(other.${_param})) {
+			return false;
+		}
+#end ## 循环语句结束
+		return true;
+	}
+#end ## 结束

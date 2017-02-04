@@ -1,0 +1,13 @@
+package ${packname};
+
+import ${dpackage}.${table.name}Dao;
+import ${epackage}.${table.name};
+import org.springframework.stereotype.Repository;
+
+/**
+ * ${table.comment}数据访问接口实现类
+ */
+@Repository
+public class ${table.name}DaoImpl extends BaseDaoImpl<${table.primaryKey.type}, ${table.name}> implements ${table.name}Dao {
+
+}

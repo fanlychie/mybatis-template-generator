@@ -1,0 +1,248 @@
+package ${packname};
+
+import ${dpackage}.BaseDao;
+import ${epackage}.Entity;
+import ${epackage}.Entity.Builder;
+import ${epackage}.Entity.Condition;
+import ${epackage}.Entity.Criteria;
+import ${epackage}.Entity.OrderBy;
+import ${epackage}.Entity.Pagination;
+import ${spackage}.BaseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 业务基类接口实现类
+ *
+ * @param <K> 主键类型
+ * @param <E> 实体类型
+ */
+public class BaseServiceImpl<K extends Serializable, E extends Entity> implements BaseService<K, E> {
+
+    /**
+     * 注入 DAO
+     */
+    @Autowired
+    private BaseDao<K, E> dao;
+
+    /**
+     * 日志
+     */
+    protected Logger logger = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 保存数据
+     *
+     * @param entity 实体类对象
+     * @return 返回保存的数据的主键, 保存失败返回 null (如果有可能)
+     */
+    @Override
+    public K save(E entity) {
+        return dao.save(entity);
+    }
+
+    /**
+     * 根据主键删除数据
+     *
+     * @param id 主键
+     * @return 删除成功返回 true, 否则返回 false
+     */
+    @Override
+    public boolean delete(K id) {
+        return dao.delete(id) == 1;
+    }
+
+    /**
+     * 根据条件删除数据
+     *
+     * @param criteria 条件对象
+     * @return 返回操作成功的记录条数
+     */
+    @Override
+    public int delete(Criteria criteria) {
+        return dao.delete(criteria);
+    }
+
+    /**
+     * 根据主键更新数据
+     *
+     * @param entity 含主键的实体类对象
+     * @return 更新成功返回 true, 否则返回 false
+     */
+    @Override
+    public boolean update(E entity) {
+        return dao.update(entity) == 1;
+    }
+
+    /**
+     * 根据条件更新数据
+     *
+     * @param entity   实体类对象
+     * @param criteria 条件对象
+     * @return 返回操作成功的记录条数
+     */
+    @Override
+    public int update(E entity, Criteria criteria) {
+        return dao.update(entity, criteria);
+    }
+
+    /**
+     * 根据主键查询唯一数据
+     *
+     * @param id 主键
+     * @return 返回查询的唯一结果数据, 如果没有则返回 null
+     */
+    @Override
+    public E selectOne(K id) {
+        return dao.selectOne(id);
+    }
+
+    /**
+     * 根据条件查询唯一数据
+     *
+     * @param criteria 条件对象
+     * @return 返回查询的唯一结果数据, 如果没有则返回 null
+     */
+    @Override
+    public E selectOne(Criteria criteria) {
+        return dao.selectOne(criteria);
+    }
+
+    /**
+     * 查询所有数据
+     *
+     * @return 返回查询结果的数据集合
+     */
+    @Override
+    public List<E> selectAll() {
+        return dao.selectAll();
+    }
+
+    /**
+     * 根据条件查询数据
+     *
+     * @param criteria 条件对象
+     * @return 返回查询结果的数据集合
+     */
+    @Override
+    public List<E> selectList(Criteria criteria) {
+        return dao.selectList(criteria);
+    }
+
+    /**
+     * 根据条件查询记录的条数
+     *
+     * @param criteria 条件对象
+     * @return 返回查询结果的记录条数
+     */
+    @Override
+    public long selectCount(Criteria criteria) {
+        return dao.selectCount(criteria);
+    }
+
+    /**
+     * 分页查询, 支持 bootstrap 分页插件, 当 page 参数不为0时表明是普通分页, 否则为 bootstrap 分页.
+     * <p>
+     * bootstrap 分页使用的参数 (将 Pagination 对象作为 Controller 方法的参数, 即可接收插件发送的参数值):<p>
+     * rows(分页结果集合, 返回字段, 无需设值),<p>
+     * total (查询结果总条数, 返回字段, 无需设值),<p>
+     * limit (每页显示的条数, 非必须, 默认 10),<p>
+     * offset (查询的起始索引值, 非必须, 默认 0),<p>
+     * sort (排序字段的名称, 非必须),<p>
+     * order (排序的关键字, 非必须),<p>
+     * search (搜索的关键字, 非必须),<p>
+     * field (搜索字段名称, bootstrap 分页插件不发送此参数, 如果有需要, 需手工设置, 建议不使用此参数, 非必须).
+     * <p>
+     * 普通分页使用参数 (将 Pagination 对象作为 Controller 方法的参数, 即可接收插件发送的参数值):<p>
+     * rows(分页结果集合, 返回字段, 无需设值),<p>
+     * total (查询结果总条数, 返回字段, 无需设值),<p>
+     * limit (每页显示的条数, 非必须, 默认 10),<p>
+     * sort (排序字段的名称, 非必须, 默认 0),<p>
+     * order (排序的关键字, 非必须),<p>
+     * search (搜索的关键字, 非必须),<p>
+     * field (搜索字段名称, 非必须),<p>
+     * page (当前请求的页码, 必须设置, 页码从 1 开始),<p>
+     * prev (上一页的页码, 返回字段, 无需设值),<p>
+     * next (下一页的页码, 返回字段, 无需设值),<p>
+     * pages (查询结果总页数, 返回字段, 无需设值)
+     *
+     * @param criteria   条件对象
+     * @param pagination 分页对象参数
+     * @return 返回分页的对象
+     */
+    @Override
+    public Pagination selectPage(Criteria criteria, Pagination pagination) {
+        // 确保分页对象任何时候都不为空
+        if (pagination == null) {
+            pagination = new Pagination();
+        }
+        // 每次查询多少条数据由 limit 参数决定, 默认每页 10 条数据
+        if (pagination.getLimit() <= 0) {
+            pagination.setLimit(10);
+        }
+        // 排序的字段名参数 sort 不为空时处理
+        if (!StringUtils.isEmpty(pagination.getSort())) {
+            // 排序关键字参数 order
+            String order = pagination.getOrder();
+            // 默认升序
+            if (order == null) {
+                order = OrderBy.ASC.name();
+                pagination.setOrder(order);
+            }
+            // 如果排序关键字非法则丢弃, 防止 SQL 注入
+            if (OrderBy.ASC.name().equalsIgnoreCase(order) || OrderBy.DESC.name().equalsIgnoreCase(order)) {
+                criteria.addCriterion(Builder.buildOrderValueCriterion(pagination.getSort(), order));
+            }
+        }
+        // 搜索字段名参数 field 不为空时处理
+        if (!StringUtils.isEmpty(pagination.getField())) {
+            // 搜索的字符串参数 search
+            String search = pagination.getSearch();
+            // 采用模糊查询
+            criteria.addCriterion(Builder.buildSingleValueCriterion(pagination.getField(), Condition.LIKE, search));
+        }
+        // 页码参数 page 不为空时, 采用页码进行分页, 否则采用默认的 offset 参数
+        if (pagination.getPage() != 0) {
+            // 根据页码计算开始的索引值
+            pagination.setOffset((pagination.getPage() - 1) * pagination.getLimit());
+        }
+        // 确保开始索引值正确
+        if (pagination.getOffset() < 0) {
+            pagination.setOffset(0);
+        }
+        // 设置查询结果的总记录条数
+        pagination.setTotal(dao.selectCount(criteria));
+        // 确保开始索引值不超出总的条数
+        if (pagination.getOffset() >= pagination.getTotal()) {
+            // 从第一条开始检索
+            pagination.setOffset(0);
+            // 如果页码不为空, 设置成第一页
+            if (pagination.getPage() != 0) {
+                pagination.setPage(1);
+            }
+        }
+        // 添加分页查询条件
+        criteria.addCriterion(Builder.buildLimitValueCriterion(pagination.getOffset(), pagination.getLimit()));
+        // 设置分页查询的结果集合
+        pagination.setRows(dao.selectList(criteria));
+        // 计算总的页数
+        int pages = (int) (pagination.getTotal() / pagination.getLimit());
+        // 设置分页总的页数
+        pagination.setPages(pagination.getTotal() % pagination.getLimit() == 0 ? pages : pages + 1);
+        // 如果页码参数不为空, 即普通分页
+        if (pagination.getPage() != 0) {
+            // 设置上一页的页码
+            pagination.setPrev(pagination.getPage() == 1 ? 1 : pagination.getPage() - 1);
+            // 设置下一页的页码
+            pagination.setNext(pagination.getPage() == pagination.getPages() ? pagination.getPage() : pagination.getPage() + 1);
+        }
+        // 返回分页的对象
+        return pagination;
+    }
+
+}

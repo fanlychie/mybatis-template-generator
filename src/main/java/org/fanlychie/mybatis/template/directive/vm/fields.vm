@@ -1,0 +1,7 @@
+#foreach($column in $_columns) ## 循环语句开始
+	/**
+	 * $column.comment
+	 */
+	private $column.type $column.name;
+	
+#end ## 循环语句结束

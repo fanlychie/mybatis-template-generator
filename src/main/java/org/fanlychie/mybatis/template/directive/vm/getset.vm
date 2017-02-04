@@ -1,0 +1,20 @@
+#foreach($column in $_columns) ## 循环语句开始
+	/**
+	 * 获取$column.comment
+	 * 
+	 * @return 返回$column.comment
+	 */
+	public $column.type $util.methodPrefix($column.type)$util.capitalize($column.name)() {
+		return $column.name;
+	}
+
+	/**
+	 * 设置$column.comment
+	 * 
+	 * @param $column.name $column.comment
+	 */
+	public void set$util.capitalize($column.name)($column.type $column.name) {
+		this.$column.name = $column.name;
+	}
+
+#end ## 循环语句结束

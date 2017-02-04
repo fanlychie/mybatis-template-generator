@@ -1,0 +1,18 @@
+package ${packname};
+
+import ${dpackage}.${table.name}Dao;
+import ${epackage}.${table.name};
+import ${spackage}.${table.name}Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * ${table.comment}业务接口实现类
+ */
+@Service
+public class ${table.name}ServiceImpl extends BaseServiceImpl<${table.primaryKey.type}, ${table.name}> implements ${table.name}Service {
+	
+	@Autowired
+	private ${table.name}Dao dao;
+
+}
