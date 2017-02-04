@@ -13,7 +13,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ public final class Generator {
             String metadataClass = Configuration.getDatasource().getMetadataClass();
             DatabaseMetadata metadata = (DatabaseMetadata) Class.forName(metadataClass).newInstance();
             List<Table> tables = metadata.getTables();
-            Map<String, Object> contextParams = new HashMap<>(Configuration.getProperties());
+            Map contextParams = Configuration.getProperties();
             contextParams.put("util", new Util());
             Map<Class<?>, String> mapping = Configuration.getMouldMapping().getMapping();
             for (Class<?> templateClass : mapping.keySet()) {
@@ -70,7 +69,7 @@ public final class Generator {
      * @param params   上下文参数
      * @throws Throwable
      */
-    private static void produceMultiFileTemplate(List<Table> tables, Template template, String pathname, Map<String, Object> params) throws Throwable {
+    private static void produceMultiFileTemplate(List<Table> tables, Template template, String pathname, Map params) throws Throwable {
         for (Table table : tables) {
             params.put("table", table);
             LinkedList<Column> allColumns = new LinkedList<>(table.getColumns());
@@ -89,7 +88,7 @@ public final class Generator {
      * @param params   上下文参数
      * @throws Throwable
      */
-    private static void produceSingleFileTemplate(List<Table> tables, Template template, String pathname, Map<String, Object> params) throws Throwable {
+    private static void produceSingleFileTemplate(List<Table> tables, Template template, String pathname, Map params) throws Throwable {
         params.put("tables", tables);
         produceTemplateFile(null, template, pathname, params);
     }
@@ -103,7 +102,7 @@ public final class Generator {
      * @param params    上下文参数
      * @throws Throwable
      */
-    private static void produceTemplateFile(String tableName, Template template, String pathname, Map<String, Object> params) throws Throwable {
+    private static void produceTemplateFile(String tableName, Template template, String pathname, Map params) throws Throwable {
         File file = new File(template.getFileOutputPath(tableName));
         if (isWritable(template, file)) {
             File parent = file.getParentFile();
