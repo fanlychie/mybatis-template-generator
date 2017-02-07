@@ -177,6 +177,29 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
      */
     @Override
     public Pagination selectPage(Criteria criteria, Pagination pagination) {
+        return selectPage(criteria, pagination, new ResultCount() {
+            @Override
+            public long totals(Criteria criteria) {
+                return dao.selectCount(criteria);
+            }
+        }, new ResultSet() {
+            @Override
+            public List<?> rows(Criteria criteria) {
+                return dao.selectList(criteria);
+            }
+        });
+    }
+
+    /**
+     * 分页查询
+     *
+     * @param criteria    条件对象
+     * @param pagination  分页对象
+     * @param resultCount 结果计数对象
+     * @param resultSet   结果集对象
+     * @return 返回分页的对象
+     */
+    protected Pagination selectPage(Criteria criteria, Pagination pagination, ResultCount resultCount, ResultSet resultSet) {
         // 确保分页对象任何时候都不为空
         if (pagination == null) {
             pagination = new Pagination();
@@ -216,7 +239,7 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
             pagination.setOffset(0);
         }
         // 设置查询结果的总记录条数
-        pagination.setTotal(dao.selectCount(criteria));
+        pagination.setTotal(resultCount.totals(criteria));
         // 确保开始索引值不超出总的条数
         if (pagination.getOffset() >= pagination.getTotal()) {
             // 从第一条开始检索
@@ -229,7 +252,7 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
         // 添加分页查询条件
         criteria.addCriterion(Builder.buildLimitValueCriterion(pagination.getOffset(), pagination.getLimit()));
         // 设置分页查询的结果集合
-        pagination.setRows(dao.selectList(criteria));
+        pagination.setRows(resultSet.rows(criteria));
         // 计算总的页数
         int pages = (int) (pagination.getTotal() / pagination.getLimit());
         // 设置分页总的页数
@@ -243,6 +266,36 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
         }
         // 返回分页的对象
         return pagination;
+    }
+
+    /**
+     * 结果集
+     */
+    protected static interface ResultSet {
+
+        /**
+         * 当前页的行数据集合
+         *
+         * @param criteria 条件对象
+         * @return 返回当前页的行数据集合
+         */
+        List<?> rows(Criteria criteria);
+
+    }
+
+    /**
+     * 结果计数
+     */
+    protected static interface ResultCount {
+
+        /**
+         * 查询结果总条数
+         *
+         * @param criteria 条件对象
+         * @return 返回查询结果的总条数
+         */
+        long totals(Criteria criteria);
+
     }
 
 }
