@@ -179,12 +179,12 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
     public Pagination selectPage(Criteria criteria, Pagination pagination) {
         return selectPage(criteria, pagination, new ResultCount() {
             @Override
-            public long totals(Criteria criteria) {
+            public long totals() {
                 return dao.selectCount(criteria);
             }
         }, new ResultSet() {
             @Override
-            public List<?> rows(Criteria criteria) {
+            public List<?> rows() {
                 return dao.selectList(criteria);
             }
         });
@@ -239,7 +239,7 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
             pagination.setOffset(0);
         }
         // 设置查询结果的总记录条数
-        pagination.setTotal(resultCount.totals(criteria));
+        pagination.setTotal(resultCount.totals());
         // 确保开始索引值不超出总的条数
         if (pagination.getOffset() >= pagination.getTotal()) {
             // 从第一条开始检索
@@ -252,7 +252,7 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
         // 添加分页查询条件
         criteria.addCriterion(Builder.buildLimitValueCriterion(pagination.getOffset(), pagination.getLimit()));
         // 设置分页查询的结果集合
-        pagination.setRows(resultSet.rows(criteria));
+        pagination.setRows(resultSet.rows());
         // 计算总的页数
         int pages = (int) (pagination.getTotal() / pagination.getLimit());
         // 设置分页总的页数
@@ -276,10 +276,9 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
         /**
          * 当前页的行数据集合
          *
-         * @param criteria 条件对象
          * @return 返回当前页的行数据集合
          */
-        List<?> rows(Criteria criteria);
+        List<?> rows();
 
     }
 
@@ -291,10 +290,9 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
         /**
          * 查询结果总条数
          *
-         * @param criteria 条件对象
          * @return 返回查询结果的总条数
          */
-        long totals(Criteria criteria);
+        long totals();
 
     }
 
