@@ -43,7 +43,6 @@ public interface Entity extends Serializable {
         }
 
 #end ## 循环语句结束
-
     }
 
 #end ## 循环语句结束
