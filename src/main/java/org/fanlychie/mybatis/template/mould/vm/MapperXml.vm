@@ -53,16 +53,16 @@
 				<foreach collection="criteria.criterions" item="criterion">
 					<choose>
 						<when test="criterion.noValue">
-							${criterion.operator} ${criterion.field} ${criterion.condition}
+							${criterion.operator} $TABLE_NAME.${criterion.field} ${criterion.condition}
 						</when>
 						<when test="criterion.singleValue">
-							${criterion.operator} ${criterion.field} ${criterion.condition} #{criterion.value}
+							${criterion.operator} $TABLE_NAME.${criterion.field} ${criterion.condition} #{criterion.value}
 						</when>
 						<when test="criterion.betweenValue">
-							${criterion.operator} ${criterion.field} ${criterion.condition} #{criterion.value} and #{criterion.constraint}
+							${criterion.operator} $TABLE_NAME.${criterion.field} ${criterion.condition} #{criterion.value} and #{criterion.constraint}
 						</when>
 						<when test="criterion.listValue">
-							${criterion.operator} ${criterion.field} ${criterion.condition}
+							${criterion.operator} $TABLE_NAME.${criterion.field} ${criterion.condition}
 							<foreach collection="criterion.value" item="item" open="(" separator="," close=")">
 								#{item}
 							</foreach>
